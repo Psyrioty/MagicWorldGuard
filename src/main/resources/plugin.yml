@@ -1,0 +1,6 @@
+name: MagicWorldGuard
+version: '${version}'
+
+main: org.psyrioty.magicWorldGuard.MagicWorldGuard
+api-version: '26.2'
+load: POSTWORLD
