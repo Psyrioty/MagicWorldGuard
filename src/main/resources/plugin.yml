@@ -4,3 +4,11 @@ version: '${version}'
 main: org.psyrioty.magicWorldGuard.MagicWorldGuard
 api-version: '26.2'
 load: POSTWORLD
+depend: [WorldGuard, FastAsyncWorldEdit]
+
+commands:
+  mwg:
+    description: MagicWorldGuard plugin commands
+    usage: /mwg
+    permission: group.default
+    permission-message: "Not permission"

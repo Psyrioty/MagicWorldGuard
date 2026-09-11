@@ -1,0 +1,32 @@
+worldsName:
+  world: "<gradient:#ff0000:#00ffff><bold>Наш мир</bold></gradient>"
+  world_the_end: "<gradient:#ff0000:#00ffff><bold>Разрушенный мир</bold></gradient>"
+  world_nether: "<gradient:#ff0000:#00ffff><bold>Ад</bold></gradient>"
+
+regionPrefix: "<gradient:#ff0000:#00ffff><bold>"
+regionSuffix: "</bold></gradient>"
+
+back: "Назад"
+backCustomModelData: 1
+
+regionSettings:
+  deleteRegionName: "Удалить регион"
+  deleteRegionNameCustomModelData: 1
+  regionNamePrefix: ""
+  regionNameSuffix: ""
+  regionNameCustomModelData: 1
+  openDoor: "Вкл/Выкл открытие дверей"
+  openDoorCustomModelData: 1
+  memberList: "Список участников привата"
+  memberListCustomModelData: 1
+  pvpOff: "Вкл/Выкл PvP"
+  pvpOffCustomModelData: 1
+  openChest: "Вкл/Выкл открытие сундуков"
+  openChestCustomModelData: 1
+  mobSpawnDeny: "Вкл/Выкл запрет спавна мобов"
+  mobSpawnDenyCustomModelData: 1
+  enderPearlAndChorusFruitDeny: "Вкл/выкл запрет перлов и хоруса"
+  enderPearlAndChorusFruitDenyCustomModelData: 1
+  regionList: "Список подприватов"
+  regionListCustomModelData: 1
+
