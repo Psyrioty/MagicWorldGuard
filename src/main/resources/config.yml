@@ -9,6 +9,20 @@ regionSuffix: "</bold></gradient>"
 back: "Назад"
 backCustomModelData: 1
 
+acceptButton: "Принять"
+cancelButton: "Отмена"
+
+createRegionName: "Создать регион"
+createRegionCustomModelData: 0
+
+
+regionMembers:
+  nextButton: "След. участники"
+  backButton: "Пред. участники"
+  prefixUsername: ""
+  suffixUsername: ""
+  addMember: "Добавить игрока"
+
 regionSettings:
   deleteRegionName: "Удалить регион"
   deleteRegionNameCustomModelData: 1

@@ -33,7 +33,7 @@ public class SelectWorld implements InventoryHolder {
     }
 
     private void createGUI(){
-        inventory = Bukkit.createInventory(this, 27);
+        inventory = Bukkit.createInventory(this, 27, "Список миров");
 
         int worldIterator = 9;
         for(org.bukkit.World world: Bukkit.getWorlds()){
@@ -80,6 +80,30 @@ public class SelectWorld implements InventoryHolder {
     public List<World> getWorldList() {
         return worldList;
     }
+
+
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    ///////////НАЖАТИЯ НА КНОПКУ////////////////////////
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    public void click(Player player, int slot){
+        int worldIterator = 0;
+
+        for(World world: worldList){
+            if(slot - 9 == worldIterator){
+                new SelectRegion(player, world, this);
+                return;
+            }
+
+            worldIterator++;
+        }
+    }
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
 
     @Override
     public @NotNull Inventory getInventory() {

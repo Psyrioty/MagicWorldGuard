@@ -18,45 +18,63 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.psyrioty.magicWorldGuard.MagicWorldGuard;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import static org.psyrioty.magicWorldGuard.Utils.Other.createButton;
+import static org.psyrioty.magicWorldGuard.Utils.RegionCreator.createRegionClick;
 import static org.psyrioty.magicWorldGuard.Utils.SubregionChecker.checkSubregionForParentRegion;
 
 public class SubregionList implements InventoryHolder {
     Inventory inventory;
     Player player;
-    Set<ProtectedRegion> regions;
+    List<ProtectedRegion> regions;
     World world;
     ProtectedRegion parentRegion;
+    InventoryHolder back;
 
     public SubregionList(
             Player player,
             World world,
-            ProtectedRegion parentRegion
+            ProtectedRegion parentRegion,
+            InventoryHolder back
     ){
         Bukkit.getScheduler().runTaskAsynchronously(MagicWorldGuard.getPlugin(),()-> {
             this.world = world;
             this.player = player;
             this.parentRegion = parentRegion;
+            this.back = back;
             createGUI(world);
             openGUI();
         });
     }
 
     private void createGUI(World world){
-        inventory = Bukkit.createInventory(this, 54);
+        inventory = Bukkit.createInventory(this, 54, "Список дочерних регионов");
 
         RegionManager manager = WorldGuard.getInstance()
                 .getPlatform()
                 .getRegionContainer()
                 .get(BukkitAdapter.adapt(world));
 
+
+        FileConfiguration config = MagicWorldGuard.getPlugin().getDefaultConfig();
+        String back = config.getString("back");
+        int backCustomModelData = config.getInt("backCustomModelData");
+        createButton(0, back, Material.ARROW, backCustomModelData, false, inventory);
+
+
+        String createRegionName = config.getString("createRegionName");
+        int createRegionCustomModelData = config.getInt("createRegionCustomModelData");
+        createButton(4, createRegionName, Material.WOODEN_AXE, createRegionCustomModelData, false, inventory);
+
         if (manager != null) {
 
             int regionIterator = 9;
 
-            regions = new HashSet<>();
+            regions = new ArrayList<>();
 
             for (ProtectedRegion region : manager.getRegions().values()) {
                 if (checkSubregionForParentRegion(player, region, parentRegion)) {
@@ -64,8 +82,6 @@ public class SubregionList implements InventoryHolder {
 
                     ItemStack itemStack = new ItemStack(Material.PAPER);
                     ItemMeta meta = itemStack.getItemMeta();
-
-                    FileConfiguration config = MagicWorldGuard.getPlugin().getDefaultConfig();
 
                     String prefix = config.getString("regionPrefix");
                     String suffix = config.getString("regionSuffix");
@@ -89,7 +105,7 @@ public class SubregionList implements InventoryHolder {
         return world;
     }
 
-    public Set<ProtectedRegion> getRegions() {
+    public List<ProtectedRegion> getRegions() {
         return regions;
     }
 
@@ -103,6 +119,39 @@ public class SubregionList implements InventoryHolder {
             }
         });
     }
+
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    ///////////НАЖАТИЯ НА КНОПКУ////////////////////////
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    public void click(Player player, int slot){
+        int regionIterator = 0;
+
+        if(slot == 0){
+            player.openInventory(back.getInventory());
+            return;
+        }
+
+        if(slot == 4){
+            createRegionClick(player);
+            return;
+        }
+
+        for(ProtectedRegion protectedRegion: regions){
+            if(slot - 9 == regionIterator){
+                new SubregionSettings((Player) player, world, protectedRegion, this);
+                return;
+            }
+
+            regionIterator++;
+        }
+    }
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
 
     @Override
     public @NotNull Inventory getInventory() {

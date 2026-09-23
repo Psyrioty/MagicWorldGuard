@@ -10,12 +10,15 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.psyrioty.magicWorldGuard.GUI.*;
 import org.psyrioty.magicWorldGuard.MagicWorldGuard;
 
 import java.util.HashMap;
+
+import static org.psyrioty.magicWorldGuard.Utils.RegionSettingsFlags.*;
 
 public class GUIEvents implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
@@ -33,6 +36,9 @@ public class GUIEvents implements Listener {
         clickSelectRegion(inventory, player, slot);
         clickRegionSettings(inventory, player, slot);
         clickSubregionList(inventory, player, slot);
+        clickKickMember(inventory, player, slot);
+        clickRegionMembers(inventory, player, slot);
+        clickSubregionSettings(inventory, player, slot);
     }
 
     private void clickSubregionList(Inventory inventory, HumanEntity player, int slot){
@@ -40,26 +46,41 @@ public class GUIEvents implements Listener {
             return;
         }
 
-        Bukkit.getLogger().info("0");
-
         SubregionList subregionList = getNeedSubregionList(player);
 
         if(subregionList == null){
             return;
         }
-        Bukkit.getLogger().info("1");
 
-        int regionIterator = 0;
+        subregionList.click((Player) player, slot);
+    }
 
-        for(ProtectedRegion protectedRegion: subregionList.getRegions()){
-            if(slot - 9 == regionIterator){
-                Bukkit.getLogger().info("2");
-                new SubregionSettings((Player) player, subregionList.getWorld(), protectedRegion);
-                return;
-            }
-
-            regionIterator++;
+    private void clickKickMember(Inventory inventory, HumanEntity player, int slot) {
+        if (!(inventory.getHolder() instanceof KickMember)) {
+            return;
         }
+
+        KickMember kickMember = getNeedKickMember(player);
+
+        if(kickMember == null){
+            return;
+        }
+
+        kickMember.click((Player) player, slot);
+    }
+
+    private void clickRegionMembers(Inventory inventory, HumanEntity player, int slot) {
+        if (!(inventory.getHolder() instanceof RegionMembers)) {
+            return;
+        }
+
+        RegionMembers regionMembers = getNeedRegionMembers(player);
+
+        if(regionMembers == null){
+            return;
+        }
+
+        regionMembers.click((Player) player, slot);
     }
 
     private void clickSelectWorld(Inventory inventory, HumanEntity player, int slot){
@@ -73,16 +94,7 @@ public class GUIEvents implements Listener {
             return;
         }
 
-        int worldIterator = 0;
-
-        for(World world: selectWorld.getWorldList()){
-            if(slot - 9 == worldIterator){
-                new SelectRegion((Player) player, world);
-                return;
-            }
-
-            worldIterator++;
-        }
+        selectWorld.click((Player) player, slot);
     }
 
     private void clickSelectRegion(Inventory inventory, HumanEntity player, int slot){
@@ -96,16 +108,7 @@ public class GUIEvents implements Listener {
             return;
         }
 
-        int regionIterator = 0;
-
-        for(ProtectedRegion protectedRegion: selectRegion.getRegions()){
-            if(slot - 9 == regionIterator){
-                new RegionSettings((Player) player, selectRegion.getWorld(), protectedRegion);
-                return;
-            }
-
-            regionIterator++;
-        }
+        selectRegion.click((Player) player, slot);
     }
 
     private void clickRegionSettings(Inventory inventory, HumanEntity player, int slot){
@@ -119,42 +122,25 @@ public class GUIEvents implements Listener {
             return;
         }
 
-        switch (slot){
-            //удалить регион
-            case 0:
-                break;
-            //список подприватов
-            case 8:
-                new SubregionList((Player) player, regionSettings.getWorld(), regionSettings.getRegion());
+        regionSettings.click((Player) player, slot);
+    }
 
-
-                break;
-            //вкл/выкл открытие дверей
-            case 10:
-                break;
-            //список участников привата
-            case 13:
-                break;
-            //вкл/выкл PvP
-            case 16:
-                break;
-            //назад
-            case 18:
-                break;
-            //вкл/выкл открытие сундуков
-            case 19:
-                break;
-            //вкл/выкл запрет спавна мобов
-            case 22:
-                break;
-            //вкл/выкл запрет перлов и хоруса
-            case 25:
-                break;
+    private void clickSubregionSettings(Inventory inventory, HumanEntity player, int slot){
+        if(!(inventory.getHolder() instanceof SubregionSettings)){
+            return;
         }
+
+        SubregionSettings subregionSettings = getNeedSubregionSettings(player);
+
+        if(subregionSettings == null){
+            return;
+        }
+
+        subregionSettings.click((Player) player, slot);
     }
 
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    /*@EventHandler(priority = EventPriority.LOWEST)
     private void CloseInventory(InventoryCloseEvent event){
         Inventory inventory = event.getInventory();
 
@@ -171,6 +157,19 @@ public class GUIEvents implements Listener {
         }
 
         MagicWorldGuard.getPlugin().getSelectWorldHashMap().remove((Player) player);
+    }*/
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private void PlayerQuitEvent(PlayerQuitEvent event){
+        Player player = event.getPlayer();
+
+        MagicWorldGuard.getPlugin().getKickMemberHashMap().remove(player);
+        MagicWorldGuard.getPlugin().getSelectWorldHashMap().remove(player);
+        MagicWorldGuard.getPlugin().getSelectRegionHashMap().remove(player);
+        MagicWorldGuard.getPlugin().getRegionSettingsHashMap().remove(player);
+        MagicWorldGuard.getPlugin().getSubregionSettingsHashMap().remove(player);
+        MagicWorldGuard.getPlugin().getSubregionListHashMap().remove(player);
+        MagicWorldGuard.getPlugin().getRegionMembersHashMap().remove(player);
     }
 
     private SelectWorld getNeedSelectWorld(HumanEntity player){
@@ -218,6 +217,36 @@ public class GUIEvents implements Listener {
         return null;
     }
 
+    private KickMember getNeedKickMember(HumanEntity player){
+        KickMember kickMember = null;
+        HashMap<Player, KickMember> kickMemberHashMap = MagicWorldGuard.getPlugin().getKickMemberHashMap();
+
+        for(Player playerInventory: kickMemberHashMap.keySet()){
+            if(player.getUniqueId().equals(playerInventory.getUniqueId())){
+                kickMember = kickMemberHashMap.get(playerInventory);
+
+                return kickMember;
+            }
+        }
+
+        return null;
+    }
+
+    private RegionMembers getNeedRegionMembers(HumanEntity player){
+        RegionMembers regionMembers = null;
+        HashMap<Player, RegionMembers> regionMembersHashMap = MagicWorldGuard.getPlugin().getRegionMembersHashMap();
+
+        for(Player playerInventory: regionMembersHashMap.keySet()){
+            if(player.getUniqueId().equals(playerInventory.getUniqueId())){
+                regionMembers = regionMembersHashMap.get(playerInventory);
+
+                return regionMembers;
+            }
+        }
+
+        return null;
+    }
+
     private RegionSettings getNeedRegionSettings(HumanEntity player){
         RegionSettings regionSettings = null;
         HashMap<Player, RegionSettings> selectRegionHashMap = MagicWorldGuard.getPlugin().getRegionSettingsHashMap();
@@ -233,6 +262,21 @@ public class GUIEvents implements Listener {
         return null;
     }
 
+    private SubregionSettings getNeedSubregionSettings(HumanEntity player){
+        SubregionSettings subregionSettings = null;
+        HashMap<Player, SubregionSettings> selectRegionHashMap = MagicWorldGuard.getPlugin().getSubregionSettingsHashMap();
+
+        for(Player playerInventory: selectRegionHashMap.keySet()){
+            if(player.getUniqueId().equals(playerInventory.getUniqueId())){
+                subregionSettings = selectRegionHashMap.get(playerInventory);
+
+                return subregionSettings;
+            }
+        }
+
+        return null;
+    }
+
     private boolean isGUI(Inventory inventory){
         InventoryHolder inventoryHolder = inventory.getHolder();
 
@@ -241,7 +285,9 @@ public class GUIEvents implements Listener {
                 inventoryHolder instanceof SelectRegion ||
                 inventoryHolder instanceof RegionSettings ||
                 inventoryHolder instanceof SubregionList ||
-                inventoryHolder instanceof SubregionSettings
+                inventoryHolder instanceof SubregionSettings ||
+                inventoryHolder instanceof RegionMembers ||
+                inventoryHolder instanceof KickMember
         ){
             return true;
         }

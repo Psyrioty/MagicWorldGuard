@@ -7,8 +7,11 @@ load: POSTWORLD
 depend: [WorldGuard, FastAsyncWorldEdit]
 
 commands:
-  mwg:
+  region:
     description: MagicWorldGuard plugin commands
-    usage: /mwg
+    usage: /region
+    aliases:
+      - rg
+      - regions
     permission: group.default
     permission-message: "Not permission"

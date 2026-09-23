@@ -3,12 +3,12 @@ package org.psyrioty.magicWorldGuard;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.psyrioty.magicWorldGuard.Commands.MWG;
+import org.psyrioty.magicWorldGuard.Commands.Region;
 import org.psyrioty.magicWorldGuard.GUI.*;
 import org.psyrioty.magicWorldGuard.Listeners.GUIEvents;
+import org.psyrioty.magicWorldGuard.Listeners.WorldGuardEvents;
 
 import java.util.HashMap;
 
@@ -22,6 +22,8 @@ public final class MagicWorldGuard extends JavaPlugin {
     private HashMap<Player, RegionSettings> regionSettingsHashMap;
     private HashMap<Player, SubregionSettings> subregionSettingsHashMap;
     private HashMap<Player, SubregionList> subregionListHashMap;
+    private HashMap<Player, RegionMembers> regionMembersHashMap;
+    private HashMap<Player, KickMember> kickMemberHashMap;
 
     @Override
     public void onEnable() {
@@ -29,8 +31,9 @@ public final class MagicWorldGuard extends JavaPlugin {
         pm = Bukkit.getServer().getPluginManager();
 
         pm.registerEvents(new GUIEvents(), this);
+        pm.registerEvents(new WorldGuardEvents(), this);
 
-        this.getCommand("mwg").setExecutor(new MWG());
+        this.getCommand("region").setExecutor(new Region());
 
         loadConfig();
 
@@ -39,6 +42,8 @@ public final class MagicWorldGuard extends JavaPlugin {
         regionSettingsHashMap = new HashMap<>();
         subregionSettingsHashMap = new HashMap<>();
         subregionListHashMap = new HashMap<>();
+        regionMembersHashMap = new HashMap<>();
+        kickMemberHashMap = new HashMap<>();
     }
 
     public HashMap<Player, SelectWorld> getSelectWorldHashMap() {
@@ -70,12 +75,46 @@ public final class MagicWorldGuard extends JavaPlugin {
         return subregionListHashMap;
     }
 
+    public HashMap<Player, KickMember> getKickMemberHashMap() {
+        return kickMemberHashMap;
+    }
+
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        for(SelectWorld selectWorld: selectWorldHashMap.values()){
+            selectWorld.getInventory().close();
+        }
+
+        for(SelectRegion selectRegion: selectRegionHashMap.values()){
+            selectRegion.getInventory().close();
+        }
+
+        for(RegionSettings regionSettings: regionSettingsHashMap.values()){
+            regionSettings.getInventory().close();
+        }
+
+        for(SubregionSettings subregionSettings: subregionSettingsHashMap.values()){
+            subregionSettings.getInventory().close();
+        }
+
+        for(SubregionList subregionList: subregionListHashMap.values()){
+            subregionList.getInventory().close();
+        }
+
+        for(RegionMembers regionMembers: regionMembersHashMap.values()){
+            regionMembers.getInventory().close();
+        }
+
+        for(KickMember kickMember: kickMemberHashMap.values()){
+            kickMember.getInventory().close();
+        }
     }
 
     public static MagicWorldGuard getPlugin() {
         return plugin;
+    }
+
+    public HashMap<Player, RegionMembers> getRegionMembersHashMap() {
+        return regionMembersHashMap;
     }
 }
