@@ -98,6 +98,31 @@ public class RegionCreator {
             }
 
             // =========================================================
+            // Проверка: не пересекает ли выделение чужие регионы
+            // =========================================================
+
+            for (ProtectedRegion other : manager.getRegions().values()) {
+
+                // Свои регионы можно пересекать
+                if (other.getOwners().contains(player.getUniqueId())) {
+                    continue;
+                }
+
+                BlockVector3 oMin = other.getMinimumPoint();
+                BlockVector3 oMax = other.getMaximumPoint();
+
+                boolean intersects =
+                        min.x() <= oMax.x() && max.x() >= oMin.x() &&
+                                min.y() <= oMax.y() && max.y() >= oMin.y() &&
+                                min.z() <= oMax.z() && max.z() >= oMin.z();
+
+                if (intersects) {
+                    player.sendMessage("§cВыделение пересекает чужой регион: §f" + other.getId());
+                    return null;
+                }
+            }
+
+            // =========================================================
             // Создание региона
             // =========================================================
 
@@ -108,6 +133,8 @@ public class RegionCreator {
 
             manager.addRegion(region);
             manager.save();
+
+            player.sendMessage("§aРегион §f\"" + id + "\" §aуспешно создан!");
 
             return region;
 
@@ -197,6 +224,9 @@ public class RegionCreator {
 
             manager.addRegion(subregion);
             manager.save();
+
+            player.sendMessage("§aПодприват §f\"" + id + "\" §aуспешно создан внутри региона §f\""
+                    + parentRegion.getId() + "\"§a.");
 
             return subregion;
 
@@ -295,6 +325,29 @@ public class RegionCreator {
             // =========================================================
 
             if (parentRegion != null) {
+                // =========================================================
+                // Проверка: выделение не должно попадать в чужой регион
+                // =========================================================
+
+                for (ProtectedRegion region : manager.getRegions().values()) {
+
+                    // Только регионы без родителя (основные приваты)
+                    if (region.getParent() != null) {
+                        continue;
+                    }
+
+                    // Выделение должно полностью находиться внутри региона
+                    if (!region.contains(min) || !region.contains(max)) {
+                        continue;
+                    }
+
+                    // Если владелец не игрок — запрещаем
+                    if (!region.getOwners().contains(player.getUniqueId())) {
+                        player.sendMessage("§cЭтот регион принадлежит другому игроку. Вы не можете здесь приватить.");
+                        return null;
+                    }
+                }
+
                 return createSubregion(player, id);
             }
 

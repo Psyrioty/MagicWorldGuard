@@ -1,6 +1,7 @@
 package org.psyrioty.magicWorldGuard;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -33,7 +34,14 @@ public final class MagicWorldGuard extends JavaPlugin {
         pm.registerEvents(new GUIEvents(), this);
         pm.registerEvents(new WorldGuardEvents(), this);
 
-        this.getCommand("region").setExecutor(new Region());
+        /*Bukkit.getScheduler().runTaskLater(this, () -> {
+            PluginCommand existing = getCommand("region");
+            if (existing == null) {
+                getCommand("region").setExecutor(new Region());
+            } else {
+                existing.setExecutor(new Region());
+            }
+        }, 1L);*/
 
         loadConfig();
 
